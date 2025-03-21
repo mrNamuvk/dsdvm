@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh Sách Học Sinh</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid black; padding: 8px; text-align: center; }
+        th { background-color: #f2f2f2; }
+        input, select { padding: 8px; margin: 10px; width: 200px; }
+    </style>
+</head>
+<body>
+    <h2>Danh Sách Học Sinh</h2>
+    <input type="text" id="searchInput" placeholder="Nhập tên học sinh..." onkeyup="searchStudent()">
+    <select id="classFilter" onchange="filterClass()">
+        <option value="">-- Lọc theo lớp --</option>
+    </select>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>STT</th>
+                <th>SQĐ</th>
+                <th>HỌC SINH</th>
+                <th>NGÀY SINH</th>
+                <th>LỚP</th>
+            </tr>
+        </thead>
+        <tbody id="studentTable"></tbody>
+    </table>
+
+    <script>
+        let studentData = [];
+
+        // Tải dữ liệu từ file JSON
+        fetch('ds_hocsinh.json')
+            .then(response => response.json())
+            .then(data => {
+                studentData = data;
+                loadTable(studentData);
+                loadClassFilter(studentData);
+            });
+
+        // Hiển thị danh sách học sinh
+        function loadTable(data) {
+            const table = document.getElementById('studentTable');
+            table.innerHTML = '';
+            data.forEach(student => {
+                let row = `<tr>
+                    <td>${student.stt}</td>
+                    <td>${student.sqd}</td>
+                    <td>${student.hoc_sinh}</td>
+                    <td>${student.ngay_sinh}</td>
+                    <td>${student.lop}</td>
+                </tr>`;
+                table.innerHTML += row;
+            });
+        }
+
+        // Tìm kiếm học sinh theo tên
+        function searchStudent() {
+            let keyword = document.getElementById('searchInput').value.toLowerCase();
+            let filteredData = studentData.filter(s => s.hoc_sinh.toLowerCase().includes(keyword));
+            loadTable(filteredData);
+        }
+
+        // Lọc danh sách theo lớp
+        function filterClass() {
+            let selectedClass = document.getElementById('classFilter').value;
+            let filteredData = selectedClass ? studentData.filter(s => s.lop === selectedClass) : studentData;
+            loadTable(filteredData);
+        }
+
+        // Tạo danh sách lớp để lọc
+        function loadClassFilter(data) {
+            let classSelect = document.getElementById('classFilter');
+            let uniqueClasses = [...new Set(data.map(s => s.lop))];
+            uniqueClasses.forEach(className => {
+                let option = document.createElement('option');
+                option.value = className;
+                option.textContent = className;
+                classSelect.appendChild(option);
+            });
+        }
+    </script>
+</body>
+</html>
